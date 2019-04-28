@@ -58,7 +58,7 @@ func main() {
 // as defined in draft-shrub.fr-shrub at
 // https://shrub.fr/doc/spec/shrub/
 func handler(w http.ResponseWriter, req *http.Request) {
-	if req.Method == "OPTIONS" {
+	if req.Method == http.MethodOptions {
 		w.Header().Set("Allow", "GET, HEAD, OPTIONS")
 		w.WriteHeader(http.StatusOK)
 		return
