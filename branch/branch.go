@@ -195,7 +195,7 @@ var errBadCORS = errors.New("shrubgateway: invalid CORS response")
 // getPayload returns a reader which reads the application/branch file.
 func getPayload(ctx context.Context, host, rootTag, branchID string, tr http.RoundTripper) (io.Reader, error) {
 
-	//	wellKnownURL uses the mapping of .Well-Known URLs defined in
+	// wellKnownURL uses the mapping of .Well-Known URLs defined in
 	// https://shrub.fr/doc/spec/shrubbery/#wellknown_definition
 	wellKnownURL := "https://" + host + "/.well-known/shrubbery/" + rootTag + "/" + branchID
 	req, err := http.NewRequest(http.MethodGet, wellKnownURL, nil)
