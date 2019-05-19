@@ -1,15 +1,15 @@
 // Copyright 2019 The shrub.fr Authors.
 // Use of this source code is governed by the CC0 1.0 Universal license
-// that can be found at "https://creativecommons.org/publicdomain/zero/1.0/".
+// that can be found at https://creativecommons.org/publicdomain/zero/1.0/
 
 // package shrubgateway starts a web server listening
 // for TLS connections on the local host's loopback interface on port 58273,
-// using the local CA at "<user's home directory>/.shrubgateway".
+// using the local CA at <user's home directory>/.shrubgateway
 //
 // This server implements the protocol associated
 // to the Shrub https subscheme, as defined in
 // draft-shrub.fr-shrub at
-// "https://shrub.fr/doc/spec/shrub/".
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrub.md
 package main
 
 import (
@@ -49,14 +49,14 @@ func main() {
 		ConnState: manageConnCache,
 	}
 
-	fmt.Println("shrubgateway v0.1.0 (Go)")
-	fmt.Println("For more information, go to \"https://shrub.fr/\".")
+	fmt.Println("shrubgateway v0.2.0 (Go)")
+	fmt.Println("For more information, go to https://shrub.fr/")
 	log.Fatal(server.ListenAndServeTLS("", ""))
 }
 
 // handler implements the protocol associated to the Shrub https subscheme,
 // as defined in draft-shrub.fr-shrub at
-// https://shrub.fr/doc/spec/shrub/
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrub.md
 func handler(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodOptions {
 		w.Header().Set("Allow", "GET, HEAD, OPTIONS")
