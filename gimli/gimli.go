@@ -6,54 +6,63 @@ package gimli
 
 // Absorb implements the function Gimli-Absorb defined in
 // draft-shrub.fr-shrubbery at
-// https://shrub.fr/doc/spec/shrubbery/#gimli_definition
-//
-// Absorb updates the sponge state s but does not modify plaintext and
-// does not return the ciphertext.
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#cryptographic-primitives
 func Absorb(s *[48]byte, plaintext []byte) {
+	l := len(plaintext) - 1
 	pos := 0
-	for _, b := range plaintext {
+	for j, b := range plaintext {
 		s[pos] ^= b
 		pos++
 		if pos == 16 {
+			if l == j {
+				s[47] ^= 1
+			}
 			permute(s)
 			pos = 0
 		}
 	}
 }
 
-// Encrypt implements the function Gimli-Absorb defined in
+// Encrypt implements the function Gimli-Encrypt defined in
 // draft-shrub.fr-shrubbery at
-// https://shrub.fr/doc/spec/shrubbery/#gimli_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#cryptographic-primitives
 //
 // Encrypt encrypts plaintext and overwrites plaintext
 // with the ciphertext.
 func Encrypt(s *[48]byte, plaintext []byte) {
+	l := len(plaintext) - 1
 	pos := 0
 	for j, b := range plaintext {
 		s[pos] ^= b
 		plaintext[j] = s[pos]
 		pos++
 		if pos == 16 {
+			if l == j {
+				s[47] ^= 1
+			}
 			permute(s)
 			pos = 0
 		}
 	}
 }
 
-// Decrypt implements the function Gimli-Squeeze defined in
+// Decrypt implements the function Gimli-Decrypt defined in
 // draft-shrub.fr-shrubbery at
-// https://shrub.fr/doc/spec/shrubbery/#gimli_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#cryptographic-primitives
 //
 // Decrypt decrypts ciphertext and overwrites ciphertext
 // with the plaintext.
 func Decrypt(s *[48]byte, ciphertext []byte) {
+	l := len(ciphertext) - 1
 	pos := 0
 	for j, b := range ciphertext {
 		ciphertext[j] ^= s[pos]
 		s[pos] = b
 		pos++
 		if pos == 16 {
+			if l == j {
+				s[47] ^= 1
+			}
 			permute(s)
 			pos = 0
 		}
@@ -62,7 +71,7 @@ func Decrypt(s *[48]byte, ciphertext []byte) {
 
 // Finalize implements the function Gimli-Finalize defined in
 // draft-shrub.fr-shrubbery at
-// https://shrub.fr/doc/spec/shrubbery/#gimli_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#cryptographic-primitives
 //
 // Finalize returns a 32-bytes-long tag of the sponge s.
 func Finalize(s *[48]byte) []byte {
@@ -79,13 +88,12 @@ func Finalize(s *[48]byte) []byte {
 
 // Pad implements the function Pad defined in
 // draft-shrub.fr-shrubbery at
-// https://shrub.fr/doc/spec/shrubbery/#gimli_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#cryptographic-primitives
 func Pad(in string) []byte {
 	l := len(in)
-	out := make([]byte, ((l+1)/16+1)*16)
-	out[0] = byte(l)
-	out[1] = byte(l >> 8)
-	copy(out[2:], in)
+	out := make([]byte, ((l/16 + 1) * 16))
+	copy(out, in)
+	out[l] = 1
 	return out
 }
 
