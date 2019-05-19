@@ -21,7 +21,7 @@ var errInvalidData = errors.New("shrubgateway: the application/branch file conta
 
 // reader reads the content of a shoot,
 // following the specifications of draft-shrub.fr-shrubbery available at
-// https://shrub.fr/doc/spec/shrubbery/#streaming_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#shootstreaming-algorithm
 type reader struct {
 	cancel        func()    // to cancel the reading of the application/branch file
 	payload       io.Reader // reader of the application/branch file
@@ -54,7 +54,7 @@ func (r *reader) Read(p []byte) (int, error) {
 			return 0, r.err
 		}
 
-		chunk := make([]byte, 4832)
+		chunk := make([]byte, 2432)
 		n, err := io.ReadFull(r.payload, chunk)
 		if err != nil && err != io.ErrUnexpectedEOF {
 			r.cancel()
@@ -80,26 +80,26 @@ func (r *reader) Read(p []byte) (int, error) {
 			return 0, r.err
 		}
 
-		if n != 4832 && chunk[1]&64 == 0 {
+		if n != 2432 && chunk[n-33]&64 == 0 {
 			r.cancel()
 			r.err = errInvalidData
 			return 0, r.err
 		}
 
-		if r.isFirstChunck && chunk[1]&128 == 0 {
+		if r.isFirstChunck && chunk[n-33]&128 == 0 {
 			r.cancel()
 			r.err = errInvalidData
 			return 0, r.err
 		}
 		r.isFirstChunck = false
 
-		l := int(chunk[0]) + int(chunk[1]&63)*256
-		if n < 2+l+32 {
+		l := int(chunk[n-34]) + int(chunk[n-33]&63)*256
+		if n-32 < 2+l {
 			r.cancel()
 			r.err = errInvalidData
 			return 0, r.err
 		}
-		r.cache = chunk[2 : 2+l]
+		r.cache = chunk[:n-32-l-2]
 
 		if chunk[1]&64 != 0 {
 			r.isLastChunck = true
@@ -115,12 +115,12 @@ func (r *reader) Read(p []byte) (int, error) {
 
 // NewShoot returns an io.Reader which reads from the content of a shoot,
 // following the specifications of draft-shrub.fr-shrubbery available at
-// https://shrub.fr/doc/spec/shrubbery/#streaming_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#shootstreaming-algorithm
 //
 // 'host' is the hostname from where the application/branch file must be
 // retrieved using the CORS protocol without credentials, with an opaque origin
 // and with the mapping of .Well-Known URLs defined at
-// https://shrub.fr/doc/spec/shrubbery/#wellknown_definition
+// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#the-well-known-uris-suffix-shrubbery
 //
 // 'rootTag' is the base32 encoding of the tag of the root of the shrub
 // containing the shoot.
@@ -196,7 +196,7 @@ var errBadCORS = errors.New("shrubgateway: invalid CORS response")
 func getPayload(ctx context.Context, host, rootTag, branchID string, tr http.RoundTripper) (io.Reader, error) {
 
 	// wellKnownURL uses the mapping of .Well-Known URLs defined in
-	// https://shrub.fr/doc/spec/shrubbery/#wellknown_definition
+	// https://github.com/shrub-fr/spec-shrub/blob/master/shrubbery.md#the-well-known-uris-suffix-shrubbery
 	wellKnownURL := "https://" + host + "/.well-known/shrubbery/" + rootTag + "/" + branchID
 	req, err := http.NewRequest(http.MethodGet, wellKnownURL, nil)
 	if err != nil {
