@@ -40,7 +40,6 @@ var base32Encoding = base32.NewEncoding("0123456789abcdefghijklmnopqrstuv").With
 var transports = &sync.Map{}
 
 func main() {
-	flag.Parse()
 	http.HandleFunc("/", handler)
 
 	server := &http.Server{
