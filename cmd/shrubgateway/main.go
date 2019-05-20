@@ -16,7 +16,6 @@ import (
 	"crypto/tls"
 	"encoding/base32"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"log"
